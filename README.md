@@ -1,5 +1,12 @@
 # newskit-styles-to-json
 
+This Sketch plugin crawls Shared Styles in a document, and parses their style data into a JSON format.
+This JSON format is typed following Figma's typings.
+This plugin is also filtering styles based on NewsKit's design system structure, using simple `includes` conditions
+
+
+
+
 ## Installation
 
 - [Download](../../releases/latest/download/newskit-styles-to-json.sketchplugin.zip) the latest release of the plugin
