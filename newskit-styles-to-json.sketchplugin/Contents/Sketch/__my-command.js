@@ -290,15 +290,15 @@ var output = {};
   }); //Combine all the styles into one Object
 
   output.texts = texts;
-  output.shadows = shadows;
   output.paints = paints;
   output.blurs = blurs;
-  var str = JSON.stringify(output); //Make a dialog box to show the output
+  output.shadows = shadows;
+  var str = JSON.stringify(output, null, 4); //Make a dialog box to show the output
 
   var UI = __webpack_require__(/*! sketch/ui */ "sketch/ui");
 
   UI.getInputFromUser("Style Output:", {
-    description: "Click OK to copy to clipboard",
+    description: "Click Ok to copy to clipboard",
     initialValue: str,
     type: UI.INPUT_TYPE.string,
     numberOfLines: 20
@@ -309,6 +309,7 @@ var output = {};
     }
 
     if (value) {
+      //Copy styles when they hit Ok
       var pasteBoard = NSPasteboard.generalPasteboard();
       pasteBoard.declareTypes_owner(NSArray.arrayWithObject(NSPasteboardTypeString), nil);
       pasteBoard.setString_forType(str, NSPasteboardTypeString);
