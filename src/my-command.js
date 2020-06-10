@@ -56,11 +56,11 @@ export default function () {
   textStyles.forEach(style => {
 
     //Output object
-    o = {}
+    let o = {}
     o.type = "TEXT"
 
     //The input style
-    inp = document.getSharedTextStyleWithID(style.objectID()).style
+   let inp = document.getSharedTextStyleWithID(style.objectID()).style
 
     //Extracting the name of the weight from the Postscript name, Figma expects this in title case with spaces.
     let fontStyle = style.style().textStyle().fontPostscriptName().split('-')[1].replace(/([a-z0-9])([A-Z])/g, '$1 $2')
@@ -92,7 +92,7 @@ export default function () {
 
   //Filter out styles that aren't fills.
   const regex = RegExp('(0[123457])', 'g')
-  fills = getSharedStyles(0).filter(style => regex.test(style.name().split('/')[0]) && !style.name().includes('border'))
+  var fills = getSharedStyles(0).filter(style => regex.test(style.name().split('/')[0]) && !style.name().includes('border'))
 
 
 
@@ -100,8 +100,8 @@ export default function () {
   //If gradient, type = gradient
   //Add gradient stops if they exist.
   fills.forEach(style => {
-    inp = style.style()
-    o = {}
+    let inp = style.style()
+    let o = {}
     o.type = "SOLID"
     o.name = `${style.name()}`
     //If a style doesn't have a fill, it causes an error
@@ -113,7 +113,7 @@ export default function () {
         b: color.blue()
       }
       o.opacity = color.alpha()
-    } catch (e) {
+    } catch (err) {
       console.error(style.name())
     }
 
@@ -127,19 +127,19 @@ export default function () {
   Sketch's API doesn't let us fetch the blend mode of a shadow.
   But, there's no logical way to set the blend mode of a box-shadow in CSS, so we ignore and set it to 'NORMAL'
   Figma doesn't allow for Spread on drop shadows. Something something GPU intensive blah blah.. 
-  We include it here anyway, because maybe one day in the future they'll enable it.
+  We include it here anyway commented out, because maybe one day in the future they'll enable it.
   */
-  shadowStyles = getSharedStyles(0).filter(style => style.name().includes('Shadows'))
+  var shadowStyles = getSharedStyles(0).filter(style => style.name().includes('Shadows'))
 
   shadowStyles.forEach(style => {
-    o = {}
+    let o = {}
     o.type = "EFFECT"
-    inp = style.style()
-
+    let inp = style.style()
+    o.name = `${style.name()}`
     o.effects = []
 
     inp.shadows().forEach(shadow => {
-      e = {}
+     let  e = {}
       e.type = "DROP_SHADOW"
       e.color = {
         r: shadow.color().red(),
@@ -147,15 +147,18 @@ export default function () {
         b: shadow.color().blue(),
         a: shadow.color().alpha()
       }
+      e.blendMode = "NORMAL"
+      e.visible = true
       e.offset = {
-        x: shadow.offsetX,
-        y: shadow.offsetY
+        x: shadow.offsetX(),
+        y: shadow.offsetY()
       }
       e.radius = shadow.blurRadius()
-      e.spread = shadow.spread()
+     // e.spread = shadow.spread()
+      o.effects.push(e)
     })
 
-    o.effects.push(e)
+    
     shadows.push(o)
   })
 
@@ -171,16 +174,16 @@ export default function () {
   3 Background
   
   */
-  blurStyles = getSharedStyles(0).filter(style => style.style().blur().isEnabled() == 1 && style.name().includes('border'))
+  var blurStyles = getSharedStyles(0).filter(style => style.style().blur().isEnabled() == 1 && !style.name().includes('border'))
   blurStyles.forEach(style => {
-    inp = style.style().blur()
+    let inp = style.style().blur()
 
-    o = {}
+   let o = {}
     o.type = "EFFECT"
     //Need a better Naming System here...
     o.name = 'Blur/' + style.name()
     o.effects = []
-    e = {}
+    let e = {}
     switch (inp.type()) {
       case 0:
         e.type = "LAYER_BLUR"
@@ -195,10 +198,11 @@ export default function () {
         e.type = "BACKGROUND_BLUR"
         break;
     }
+    e.visible = true
+    e.radius = inp.radius()
 
-    e.radius = inp.radius
-    //Saturation is not yet supported for background blurs in Figma.. but we send the data anyway.
-    inp.saturation() ? e.saturation = inp.saturation() : null
+    //Saturation is not yet supported for background blurs in Figma..
+    //inp.saturation() ? e.saturation = inp.saturation() : null
 
     o.effects.push(e)
     blurs.push(o)
